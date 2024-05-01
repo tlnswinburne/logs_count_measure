@@ -3,7 +3,7 @@ This main goal for this project is to create a tool for log counting and measure
 each log
 • CS areas: Computer vision, machine learning, IoT hardware integration
 
-<hd>packages needed to run AI CAM files</hd>
+<hd>packages needed to run AI CAM files</hd></bl>
 download the zip and install ESP32 Cam library in arduino IDE: https://github.com/yoursunny/esp32cam
 ```
 pip install numpy
