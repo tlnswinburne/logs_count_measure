@@ -9,3 +9,10 @@ download the zip and install ESP32 Cam library in arduino IDE: https://github.co
 pip install numpy
 pip install opencv-python
 ```
+
+#Packages needs to run the python script
+Choose the latest version for ultralytics
+```
+pip install ultralytics==8.0.196
+pip install opencv-python    
+```
