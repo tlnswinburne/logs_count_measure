@@ -33,32 +33,38 @@ root.withdraw()  # Hide the main window
 
 # Load the YOLO model
 model = YOLO('best.pt')
-
-# Initialize the webcam
-img_resp = urllib.request.urlopen(url+'cam-hi.jpg')
-imgnp = np.array(bytearray(img_resp.read()),dtype=np.uint8)
-cap = cv2.imdecode(imgnp,-1)
 cv2.namedWindow('Live Detection')
 cv2.setMouseCallback('Live Detection', draw_line)
 
 while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+    # Initialize the webcam
+    img_resp = urllib.request.urlopen(url+'cam-hi.jpg')
+    imgnp = np.array(bytearray(img_resp.read()),dtype=np.uint8)
+    frame = cv2.imdecode(imgnp,-1)
 
+    if frame is None:
+        print("could not read frame")
+        break
+    
+
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     # Predict using the YOLO model
-    results = model.predict(frame)
+    results = model.predict(rgb_frame)
     
     # Draw detections from results
     if results[0].boxes is not None:
         for box in results[0].boxes:
             x1, y1, x2, y2 = int(box.xyxy[0][0].item()), int(box.xyxy[0][1].item()), int(box.xyxy[0][2].item()), int(box.xyxy[0][3].item())
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            confidence = box.conf[0]
+            class_id = int(box.cls[0])
+            label = f"{model.names[class_id]}: {confidence:.2f}"
+            cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 0), 2)
             if scale:
                 width_cm = (x2 - x1) / scale
                 height_cm = (y2 - y1) / scale
-                label = f"{width_cm:.2f} cm x {height_cm:.2f} cm"
-                cv2.putText(frame, label, (x1, y1 - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+                measurement = f"{width_cm:.2f} cm x {height_cm:.2f} cm"
+                cv2.putText(frame, measurement, (x1, y1 - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 0), 2)
 
     # Show the frame
     cv2.imshow('Live Detection', frame)
@@ -67,6 +73,5 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-cap.release()
 cv2.destroyAllWindows()
 root.destroy()  # Close the GUI
