@@ -1,4 +1,5 @@
 import cv2
+import urllib.request
 import numpy as np
 import tkinter as tk
 from tkinter import simpledialog
@@ -21,6 +22,10 @@ def draw_line(event, x, y, flags, param):
 # Initialize variables
 ref_points = []
 scale = None
+# IP address of the camera
+url='http://192.168.68.104/'
+# extension for quality of capture
+##'''cam.bmp / cam-lo.jpg /cam-hi.jpg / cam.mjpeg '''
 
 # Create a root window
 root = tk.Tk()
@@ -30,7 +35,9 @@ root.withdraw()  # Hide the main window
 model = YOLO('best.pt')
 
 # Initialize the webcam
-cap = cv2.VideoCapture(0)
+img_resp = urllib.request.urlopen(url+'cam-hi.jpg')
+imgnp = np.array(bytearray(img_resp.read()),dtype=np.uint8)
+cap = cv2.imdecode(imgnp,-1)
 cv2.namedWindow('Live Detection')
 cv2.setMouseCallback('Live Detection', draw_line)
 
