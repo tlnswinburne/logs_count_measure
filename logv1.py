@@ -23,7 +23,7 @@ def draw_line(event, x, y, flags, param):
 ref_points = []
 scale = None
 # IP address of the camera
-url='http://192.168.68.104/'
+url='http://192.168.68.110/'
 # extension for quality of capture
 ##'''cam.bmp / cam-lo.jpg /cam-hi.jpg / cam.mjpeg '''
 

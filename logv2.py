@@ -58,7 +58,7 @@ def update_frame():
         print("could not read frame")
     else:
         process_detections(frame)
-        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        img = Image.fromarray(frame)
         imgtk = ImageTk.PhotoImage(image=img)
         image_label.imgtk = imgtk
         image_label.configure(image=imgtk)
