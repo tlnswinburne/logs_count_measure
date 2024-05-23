@@ -4,9 +4,14 @@ import tkinter as tk
 from tkinter import ttk, Label, Button, Entry, StringVar, Frame
 from ultralytics import YOLO
 from PIL import Image, ImageTk
+import urllib.request
 
 # Define known width of a standard truck in cm
 KNOWN_TRUCK_WIDTH = 250
+# IP address of the camera
+url='http://192.168.68.110/'
+# extension for quality of capture
+##'''cam.bmp / cam-lo.jpg /cam-hi.jpg / cam.mjpeg '''
 
 def calculate_scale_from_truck(truck_box):
     pixel_width = truck_box[2] - truck_box[0]
@@ -43,20 +48,27 @@ def clear_reference_measurement():
     print("Reference measurement and logs data cleared.")
 
 def update_frame():
-    global frame
-    ret, frame = cap.read()
-    if ret:
-        process_detections()
+    # Initialize the webcam
+    img_resp = urllib.request.urlopen(url+'cam-hi.jpg')
+    imgnp = np.array(bytearray(img_resp.read()),dtype=np.uint8)
+    raw_frame = cv2.imdecode(imgnp,-1)
+    frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2RGB)
+
+    if frame is None:
+        print("could not read frame")
+    else:
+        process_detections(frame)
         img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         imgtk = ImageTk.PhotoImage(image=img)
         image_label.imgtk = imgtk
         image_label.configure(image=imgtk)
+
     root.after(10, update_frame)
 
 
 
-def process_detections():
-    global frame, truck_detected, truck_box
+def process_detections(frame):
+    global truck_detected, truck_box
     truck_detected = False
     truck_box = []
     # Predict using YOLO models
@@ -93,10 +105,9 @@ def process_detections():
         count += 1
     log_count_var.set(f"Logs detected: {count}")
 
-# Initialize models and webcam
+# Initialize models
 log_model = YOLO('best.pt')
 truck_model = YOLO('best_truck.pt')
-cap = cv2.VideoCapture(0)
 
 # Tkinter GUI setup
 root = tk.Tk()
@@ -148,5 +159,4 @@ root.after(0, update_frame)
 
 # Start GUI
 root.mainloop()
-cap.release()
 cv2.destroyAllWindows()
